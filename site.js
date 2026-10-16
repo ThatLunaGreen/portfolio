@@ -69,7 +69,21 @@
   }
 
   const isCanvas=p=>p?.kind==='infinite-canvas';
-  async function readJSON(path){const response=await fetch(path,{cache:'no-cache'});if(!response.ok)throw Error('Could not load '+path+' ('+response.status+').');return response.json();}
+  async function readJSON(path){
+    for(let attempt=0;attempt<2;attempt++){
+      const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),20000);
+      let response;
+      try{
+        response=await fetch(path,{cache:'no-cache',signal:controller.signal});
+        if(!response.ok)throw Error('Could not load '+path+' ('+response.status+').');
+        return await response.json();
+      }catch(error){
+        const networkError=controller.signal.aborted||error?.name==='AbortError'||error instanceof TypeError;
+        if((response&&!response.ok)||!networkError)throw error;
+        if(attempt===1)throw Error('This page is taking longer than expected. Please refresh to try again.');
+      }finally{clearTimeout(timer);}
+    }
+  }
   function registerAssets(records){for(const[id,a]of Object.entries(records))state.assets[id]={...a,dataUrl:new URL(a.dataUrl,document.baseURI).href};}
   async function getPage(id){if(pageCache.has(id))return pageCache.get(id);const meta=state.project.pages.find(p=>p.id===id);if(!meta)throw Error('This page is unavailable.');const[scene,assets]=await Promise.all([readJSON(meta.scene),readJSON(meta.assets)]);registerAssets(assets);pageCache.set(id,scene);return scene;}
   function visit(layers,fn){for(const l of layers||[]){fn(l);if(l.children)visit(l.children,fn);}}
