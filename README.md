@@ -13,3 +13,5 @@ The contact form submits to Formspree, where visitors complete the hosted CAPTCH
 Source edits are maintained in the private local visual editor. Regenerate this public package after saving the latest project JSON. Keep reference photos, editor backups and complete project JSON out of this public repository.
 
 Third-party notices: see THIRD_PARTY_NOTICES.md.
+
+Performance: display-sized WebP derivatives, full-glyph WOFF2 fonts, pre-baked effects, prioritized first-screen images, deferred offscreen media, progressive Cover initialization and paused Cover reuse. Original assets remain in the local authoring project. Content-addressed binary assets use long-lived Cloudflare browser caching.
